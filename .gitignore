@@ -1,0 +1,5 @@
+venv/
+*.bundle
+__pycache__/
+*.test.py
+README.md

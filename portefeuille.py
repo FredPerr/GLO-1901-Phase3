@@ -19,6 +19,12 @@ class Portefeuille:
         self.nom = nom
         self.courtage = []  # (date, symbole, quantité, prix unitaire)
         self.courant = []  # (date, montant)
+        # lire portefeuille à partir d'un fichier JSON.
+        data = self.lire_json()
+        if data is not None:
+            self.courant = data["courant"]
+            self.courtage = data["courtage"]
+
 
     def déposer(self, montant: float, date: dt.date = dt.date.today()):
         """
@@ -36,6 +42,7 @@ class Portefeuille:
             raise ErreurDate(
                 "La date spécifiée est postérieure à la date du jour.")
         self.courtage.append((date, montant))
+        self.écrire_json()
 
     def solde(self, date: dt.date = dt.date.today()):
         """
@@ -89,6 +96,7 @@ class Portefeuille:
 
         self.courant.append((date, -valeur_totale))
         self.courtage.append((date, symbole, quantité, prix))
+        self.écrire_json()
 
     def nombre_actions(self, symbole: str, date: dt.date = dt.date.today()):
         """
@@ -135,6 +143,7 @@ class Portefeuille:
         valeur_totale = prix * quantité
         self.courtage.append((date, symbole, -quantité, prix))
         self.courant.append((date, valeur_totale))
+        self.écrire_json()
 
     def valeur_totale(self, date: dt.date = dt.date.today()):
         """
@@ -262,12 +271,15 @@ class Portefeuille:
         remain_days = duration.days % 365
         return prix * quantité * (1 + rendement/100) ** diff_years + \
             remain_days / 365 * prix * quantité * rendement / 100
-    
-
-    #sauvegarde portefeuille
 
     def lire_json(self):
-        porte_feuille = {}
+        """
+        Lit les données d'un fichier JSON et retourne un dictionnaire représentant le portefeuille.
+
+        Returns:
+            dict: Un dictionnaire représentant le portefeuille.
+        """
+        porte_feuille = None
         nom_fichier = f"{self.nom}.json"
         if os.path.isfile(nom_fichier):
             with open(nom_fichier, 'r', encoding="utf8") as fichier:
@@ -276,64 +288,93 @@ class Portefeuille:
 
 
     def écrire_json(self):
+        """
+        Écrit les données de l'objet dans un fichier JSON.
+        """
         nom_fichier = f"{self.nom}.json"
+        a = json.dumps(self)
         with open(nom_fichier, "w", encoding="utf8") as fichier:
-            a = json.dumps(self)
             fichier.write(a)
 
-
-    #rendement annuel
-            
     def projection(self, vo, tau, annee, m):
-        Vn = (vo*(1 + (tau/100))**annee)
-        projection = (m/365)*Vn*(tau/100)
-        return Vn + projection
-    
-    #calculer_quartiles
+        """
+        Calcule la projection du portefeuille après un certain nombre d'années.
+
+        Args:
+            vo (float): La valeur initiale du portefeuille.
+            tau (float): Le taux de croissance annuel en pourcentage.
+            annee (int): Le nombre d'années pour la projection.
+            m (int): Le nombre de jours dans une année.
+
+        Returns:
+            float: La valeur projetée du portefeuille après la période donnée.
+        """
+        interests = vo*(1 + (tau/100))**annee
+        capital = (m/365)*interests*(tau/100)
+        return interests + capital
+
     def calculer_quartiles(self, volatilite, rendement):
+        """
+        Calcule les quartiles d'une distribution.
+
+        Args:
+            volatilite (float): La volatilité de la distribution.
+            rendement (float): Le rendement moyen de la distribution.
+
+        Returns:
+            tuple: Un tuple contenant le premier quartile (Q1), le deuxième quartile (Q2)
+                et le troisième quartile (Q3).
+        """
         nbr_projection = 1000
 
         rendements = np.random.normal(rendement, volatilite, nbr_projection)
 
-        Q1 = np.percentile(rendements, 25)
-        Q2 = np.percentile(rendements, 50)
-        Q3 = np.percentile(rendements, 75)
+        q1 = np.percentile(rendements, 25)
+        q2 = np.percentile(rendements, 50)
+        q3 = np.percentile(rendements, 75)
 
-        return Q1, Q2, Q3
-    
-    
+        return q1, q2, q3
+
+
 class PortefeuilleGraphique(Portefeuille):
+    """Gestion d'un portefeuille d'actions et de liquidités avec graphiques"""
 
-    def __init__(self, bourse: Bourse, nom: str = "folio"):
-        super().__init__(bourse, nom)
+    def lister(self, date, valeurs):    # CHANGER VALEUR POUR CE QU'ON VEUT
+        """
+        Affiche un graphique de l'historique des valeurs des actions.
 
-        def lister(self, date, valeurs):    # CHANGER VALEUR POUR CE QU'ON VEUT
-            
-            x = np.linspace(date, datetime.today())
+        Args:
+            date (datetime): La date de début de l'historique.
+            valeurs (list): Une liste des valeurs des actions.
+        """
 
-            plt.title("Historique des valeurs des actions")
-            plt.ylabel("Valeurs des actions à la bourse")
-            plt.xlabel("Dates")
-            plt.xticks(rotation=46)   #pour l'esthétique
-            plt.plot(x, valeurs, "b-", label="courbe valeurs bourse")
-            plt.legend()
-            plt.grid(True)
-            plt.show()
+        x = np.linspace(date, datetime.today())
 
-
-        def projeter(self, date, valeurs):          #CHANGER VALEURS POUR CE QU'ON VEUT
-
-            x = np.linspace(datetime.today(), date)
-
-            plt.title("Quartiles des projections échantilllonnées tous les 3 mois")
-            plt.ylabel("Valeurs projetée des actions")
-            plt.xlabel("Dates")
-            plt.xticks(rotation=46)
-            plt.plot(x, valeurs, "r-", label="courbe valeurs bourse")
-            plt.legend()
-            plt.grid(True)
-            plt.show()
+        plt.title("Historique des valeurs des actions")
+        plt.ylabel("Valeurs des actions à la bourse")
+        plt.xlabel("Dates")
+        plt.xticks(rotation=46)   #pour l'esthétique
+        plt.plot(x, valeurs, "b-", label="courbe valeurs bourse")
+        plt.legend()
+        plt.grid(True)
+        plt.show()
 
 
+    def projeter(self, date, valeurs):
+        """
+        Projette les valeurs des actions jusqu'à une date donnée.
 
-    
+        Args:
+            date (datetime): La date jusqu'à laquelle projeter les valeurs.
+            valeurs (list): Une liste des valeurs des actions.
+        """
+        x = np.linspace(datetime.today(), date)
+
+        plt.title("Quartiles des projections échantilllonnées tous les 3 mois")
+        plt.ylabel("Valeurs projetée des actions")
+        plt.xlabel("Dates")
+        plt.xticks(rotation=46)
+        plt.plot(x, valeurs, "r-", label="courbe valeurs bourse")
+        plt.legend()
+        plt.grid(True)
+        plt.show()

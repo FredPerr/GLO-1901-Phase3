@@ -49,17 +49,17 @@ def analyser_commande()-> Namespace:
 
     return parser.parse_args()
 
-portefeuille = Portefeuille(Bourse())
 args = analyser_commande()
-print(args)
+portefeuille = Portefeuille(Bourse(), args.portefeuille)
 
 if args.action == "déposer":
     portefeuille.déposer(args.quantité, args.date)
 if args.action == 'acheter':
-    portefeuille.acheter(args.titres, args.quantité, args.date)
+    for i in args.titres:
+        portefeuille.acheter(i, args.quantité, args.date)
 if args.action == 'vendre':
     portefeuille.vendre(args.titres, args.quantité, args.date)
 if args.action == 'projeter':
-    portefeuille.projection(portefeuille.valeur_des_titres(args.tires, args.date), args.rendement, args.date - date.today(), 365)
+    portefeuille.projection(portefeuille.valeur_des_titres(args.titres, date.today()), args.rendement, args.date - date.today(), 365)
 if args.action == 'lister':
     portefeuille.titres(args.date)

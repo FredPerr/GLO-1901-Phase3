@@ -19,6 +19,12 @@ class Portefeuille:
         self.nom = nom
         self.courtage = []  # (date, symbole, quantité, prix unitaire)
         self.courant = []  # (date, montant)
+        # lire portefeuille à partir d'un fichier JSON.
+        data = self.lire_json()
+        if data is not None:
+            self.courant = data["courant"]
+            self.courtage = data["courtage"]
+
 
     def déposer(self, montant: float, date: dt.date = dt.date.today()):
         """
@@ -36,6 +42,7 @@ class Portefeuille:
             raise ErreurDate(
                 "La date spécifiée est postérieure à la date du jour.")
         self.courtage.append((date, montant))
+        self.écrire_json()
 
     def solde(self, date: dt.date = dt.date.today()):
         """
@@ -89,6 +96,7 @@ class Portefeuille:
 
         self.courant.append((date, -valeur_totale))
         self.courtage.append((date, symbole, quantité, prix))
+        self.écrire_json()
 
     def nombre_actions(self, symbole: str, date: dt.date = dt.date.today()):
         """
@@ -135,6 +143,7 @@ class Portefeuille:
         valeur_totale = prix * quantité
         self.courtage.append((date, symbole, -quantité, prix))
         self.courant.append((date, valeur_totale))
+        self.écrire_json()
 
     def valeur_totale(self, date: dt.date = dt.date.today()):
         """
@@ -270,7 +279,7 @@ class Portefeuille:
         Returns:
             dict: Un dictionnaire représentant le portefeuille.
         """
-        porte_feuille = {}
+        porte_feuille = None
         nom_fichier = f"{self.nom}.json"
         if os.path.isfile(nom_fichier):
             with open(nom_fichier, 'r', encoding="utf8") as fichier:
@@ -338,7 +347,7 @@ class PortefeuilleGraphique(Portefeuille):
             date (datetime): La date de début de l'historique.
             valeurs (list): Une liste des valeurs des actions.
         """
-        
+
         x = np.linspace(date, datetime.today())
 
         plt.title("Historique des valeurs des actions")

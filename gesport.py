@@ -1,6 +1,8 @@
 """Module principal du programme, analyse de la commande de l'utilisateur"""
 from datetime import date
 from argparse import Namespace, ArgumentParser
+from portefeuille import Portefeuille
+from bourse import Bourse
 
 def analyser_commande()-> Namespace:
     """Analyse la commande entrée par l'utilisateur"""
@@ -30,7 +32,7 @@ def analyser_commande()-> Namespace:
 
     parser = ArgumentParser(prog="gesport.py", description="Gestionnaire de portefeuille d'actions")
 
-    subparser = parser.add_subparsers(required=True, title="ACTIONS")
+    subparser = parser.add_subparsers(required=True, title="ACTIONS", dest = 'action')
     configure_subparser(subparser.add_parser('déposer',
         help="À la date spécifiée, déposer la quantité de dollars spécifiée"))
 
@@ -47,5 +49,17 @@ def analyser_commande()-> Namespace:
 
     return parser.parse_args()
 
+portefeuille = Portefeuille(Bourse())
+args = analyser_commande()
+print(args)
 
-analyser_commande()
+if args.action == "déposer":
+    portefeuille.déposer(args.quantité, args.date)
+if args.action == 'acheter':
+    portefeuille.acheter(args.titres, args.quantité, args.date)
+if args.action == 'vendre':
+    portefeuille.vendre(args.titres, args.quantité, args.date)
+if args.action == 'projeter':
+    portefeuille.projection(portefeuille.valeur_des_titres(args.tires, args.date), args.rendement, args.date - date.today(), 365)
+if args.action == 'lister':
+    portefeuille.titres(args.date)

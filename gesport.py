@@ -38,17 +38,17 @@ def analyser_commande() -> Namespace:
     subparser = parser.add_subparsers(
         required=True, title="ACTIONS", dest='action')
     configure_subparser(subparser.add_parser('déposer',
-                                             help="À la date spécifiée, déposer la quantité de dollars spécifiée"))
+            help="À la date spécifiée, déposer la quantité de dollars spécifiée"))
 
     configure_subparser(subparser.add_parser('acheter',
-                                             help="À la date spécifiée, acheter la quantité spécifiée des titres spécifiées"))
+            help="À la date spécifiée, acheter la quantité spécifiée des titres spécifiées"))
     configure_subparser(subparser.add_parser('vendre',
-                                             help="À la date spécifiée, vendre la quantité spécifiée des titres spécifiées"))
+            help="À la date spécifiée, vendre la quantité spécifiée des titres spécifiées"))
     configure_subparser(subparser.add_parser('lister',
-                                             help="À la date spécifiée, pour chacun des titres spécifiés, lister les nombres \
+            help="À la date spécifiée, pour chacun des titres spécifiés, lister les nombres \
             d'actions détenues ainsi que leur"))
     configure_subparser(subparser.add_parser('projeter',
-                                             help="À la date future spécifiée, projeter la valeur totale des titres spécifiés, \
+            help="À la date future spécifiée, projeter la valeur totale des titres spécifiés, \
             en tenant compte des rendements et indices de volatilité spécifiés"))
 
     return parser.parse_args()
@@ -85,16 +85,16 @@ elif args.action == 'vendre':
 elif args.action == 'projeter':
     if args.titres is None:
         args.titres = portefeuille.titres(date.today()).keys()
-    _total = 0
+    TOTAL = 0
     for title in args.titres:
         symbole, rendement, ecart_type = parse_symbol(title)
         vo = portefeuille.valeur_des_titres([symbole,], date.today())
         delta = args.date - date.today()
-        _total += portefeuille.projection(vo,
+        TOTAL += portefeuille.projection(vo,
                                           rendement if rendement is not None else args.rendement,
                                           delta.days / 365,
                                           ecart_type if ecart_type is not None else args.volatilité)
-    print(f"valeur projetée = {_total}")
+    print(f"valeur projetée = {TOTAL}")
 elif args.action == 'lister':
     if args.graphique:
         data = bourse.données_bourse('goog', args.date, date.today())

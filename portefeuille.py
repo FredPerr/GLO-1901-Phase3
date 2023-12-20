@@ -4,6 +4,7 @@ from typing import Union
 import datetime as dt
 import json
 import os
+import numpy as np
 from exceptions import ErreurDate, LiquiditéInsuffisante, ErreurQuantité
 from bourse import Bourse
 
@@ -285,3 +286,17 @@ class Portefeuille:
         Vn = (vo*(1 + (tau/100))**annee)
         projection = (m/365)*Vn*(tau/100)
         return Vn + projection
+    
+    #calculer_quartiles
+    def calculer_quartiles(self, volatilite, rendement):
+        nbr_projection = 1000
+
+        rendements = np.random.normal(rendement, volatilite, nbr_projection)
+
+        Q1 = np.percentile(rendements, 25)
+        Q2 = np.percentile(rendements, 50)
+        Q3 = np.percentile(rendements, 75)
+
+        return Q1, Q2, Q3
+    
+

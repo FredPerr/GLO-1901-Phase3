@@ -265,11 +265,15 @@ class Portefeuille:
 
     def lire_json(self):
         porte_feuille = {}
-        nom_fichier = f"{self.name}.json"
+        nom_fichier = f"{self.nom}.json"
         if os.path.isfile(nom_fichier):
-            with open(nom_fichier, 'r') as fichier:
+            with open(nom_fichier, 'r', encoding="utf8") as fichier:
                 porte_feuille = json.load(fichier)
-        return nom_fichier
+        return porte_feuille
 
 
     def écrire_json(self):
+        nom_fichier = f"{self.nom}.json"
+        with open(nom_fichier, "w", encoding="utf8") as fichier:
+            a = json.dumps(self)
+            fichier.write(a)

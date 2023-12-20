@@ -277,3 +277,11 @@ class Portefeuille:
         with open(nom_fichier, "w", encoding="utf8") as fichier:
             a = json.dumps(self)
             fichier.write(a)
+
+
+    #rendement annuel
+            
+    def projection(self, vo, tau, annee, m):
+        Vn = (vo*(1 + (tau/100))**annee)
+        projection = (m/365)*Vn*(tau/100)
+        return Vn + projection

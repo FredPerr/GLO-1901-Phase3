@@ -4,6 +4,7 @@ from typing import Union
 import datetime as dt
 import json
 import os
+import matplotlib.pyplot as plt
 import numpy as np
 from exceptions import ErreurDate, LiquiditéInsuffisante, ErreurQuantité
 from bourse import Bourse
@@ -299,4 +300,8 @@ class Portefeuille:
 
         return Q1, Q2, Q3
     
+    
+class PortefeuilleGraphique(Portefeuille):
 
+    def __init__(self, )
+    

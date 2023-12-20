@@ -4,6 +4,7 @@ from typing import Union
 import datetime as dt
 import json
 import os
+from datetime import datetime
 import matplotlib.pyplot as plt
 import numpy as np
 from exceptions import ErreurDate, LiquiditéInsuffisante, ErreurQuantité
@@ -303,5 +304,22 @@ class Portefeuille:
     
 class PortefeuilleGraphique(Portefeuille):
 
-    def __init__(self, )
+    def __init__(self, bourse: Bourse, nom: str = "folio"):
+        super().__init__(bourse, nom)
+
+        def lister(self, date, valeurs):    # CHANGER VALEUR POUR CE QU'ON VEUT
+            
+            x = np.linspace(date, datetime.today())
+
+            plt.title("Historique des valeurs des actions")
+            plt.ylabel("Valeurs projetées à la bourse")
+            plt.xlabel("Dates")
+            plt.xticks(rotation=46)   #pour l'esthétique
+            plt.plot(x, valeurs, "b-", label="valeur bourse")
+            plt.legend()
+            plt.grid(True)
+            plt.show()
+
+
+        def projeter(self):
     

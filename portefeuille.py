@@ -2,6 +2,8 @@
 """
 from typing import Union
 import datetime as dt
+import json
+import os
 from exceptions import ErreurDate, LiquiditéInsuffisante, ErreurQuantité
 from bourse import Bourse
 
@@ -257,3 +259,17 @@ class Portefeuille:
         remain_days = duration.days % 365
         return prix * quantité * (1 + rendement/100) ** diff_years + \
             remain_days / 365 * prix * quantité * rendement / 100
+    
+
+    #sauvegarde portefeuille
+
+    def lire_json(self):
+        porte_feuille = {}
+        nom_fichier = f"{self.name}.json"
+        if os.path.isfile(nom_fichier):
+            with open(nom_fichier, 'r') as fichier:
+                porte_feuille = json.load(fichier)
+        return nom_fichier
+
+
+    def écrire_json(self):

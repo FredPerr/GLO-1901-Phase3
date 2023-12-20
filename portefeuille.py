@@ -312,14 +312,28 @@ class PortefeuilleGraphique(Portefeuille):
             x = np.linspace(date, datetime.today())
 
             plt.title("Historique des valeurs des actions")
-            plt.ylabel("Valeurs projetées à la bourse")
+            plt.ylabel("Valeurs des actions à la bourse")
             plt.xlabel("Dates")
             plt.xticks(rotation=46)   #pour l'esthétique
-            plt.plot(x, valeurs, "b-", label="valeur bourse")
+            plt.plot(x, valeurs, "b-", label="courbe valeurs bourse")
             plt.legend()
             plt.grid(True)
             plt.show()
 
 
-        def projeter(self):
+        def projeter(self, date, valeurs):          #CHANGER VALEURS POUR CE QU'ON VEUT
+
+            x = np.linspace(datetime.today(), date)
+
+            plt.title("Quartiles des projections échantilllonnées tous les 3 mois")
+            plt.ylabel("Valeurs projetée des actions")
+            plt.xlabel("Dates")
+            plt.xticks(rotation=46)
+            plt.plot(x, valeurs, "r-", label="courbe valeurs bourse")
+            plt.legend()
+            plt.grid(True)
+            plt.show()
+
+
+
     

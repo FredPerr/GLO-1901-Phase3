@@ -20,11 +20,7 @@ class Portefeuille:
         self.courtage = []  # (date, symbole, quantité, prix unitaire)
         self.courant = []  # (date, montant)
         # lire portefeuille à partir d'un fichier JSON.
-        data = self.lire_json()
-        if data is not None:
-            self.courant = data["courant"]
-            self.courtage = data["courtage"]
-
+        self.lire_json()
 
     def déposer(self, montant: float, date: dt.date = dt.date.today()):
         """
@@ -41,7 +37,7 @@ class Portefeuille:
         if date > dt.date.today():
             raise ErreurDate(
                 "La date spécifiée est postérieure à la date du jour.")
-        self.courtage.append((date, montant))
+        self.courant.append((date, montant))
         self.écrire_json()
 
     def solde(self, date: dt.date = dt.date.today()):
@@ -64,7 +60,7 @@ class Portefeuille:
                 "La date spécifiée est postérieure à la date du jour.")
 
         solde = 0.0
-        for t_date, t_montant in self.courtage:
+        for t_date, t_montant in self.courant:
             if t_date <= date:
                 solde += t_montant
         return solde
@@ -254,7 +250,7 @@ class Portefeuille:
         return totale
 
     def valeur_projetée_symbole(self, duration: dt.timedelta, prix: float, quantité: int,
-                                 rendement: float):
+                                rendement: float):
         """
         Calcule la valeur projetée d'un symbole sur une période donnée.
 
@@ -275,24 +271,30 @@ class Portefeuille:
     def lire_json(self):
         """
         Lit les données d'un fichier JSON et retourne un dictionnaire représentant le portefeuille.
-
-        Returns:
-            dict: Un dictionnaire représentant le portefeuille.
         """
-        porte_feuille = None
         nom_fichier = f"{self.nom}.json"
-        if os.path.isfile(nom_fichier):
-            with open(nom_fichier, 'r', encoding="utf8") as fichier:
-                porte_feuille = json.load(fichier)
-        return porte_feuille
+        if not os.path.isfile(nom_fichier):
+            return
+        with open(nom_fichier, 'r', encoding="utf8") as fichier:
+            data = json.load(fichier)
 
+            self.courant = [(datetime.strptime(d_str, "%Y-%m-%d").date(), montant)
+                            for d_str, montant in data["courant"]]
+            self.courtage = [(datetime.strptime(
+                d_str, "%Y-%m-%d").date(), symbole, qty, prix)
+                for d_str, symbole, qty, prix in data["courtage"]]
 
     def écrire_json(self):
         """
         Écrit les données de l'objet dans un fichier JSON.
         """
         nom_fichier = f"{self.nom}.json"
-        a = json.dumps(self)
+        serialized_courant = [(d.strftime("%Y-%m-%d"), montant)
+                              for d, montant in self.courant]
+        serialized_courtage = [(d.strftime("%Y-%m-%d"), symbole, quantité, prix)
+                               for d, symbole, quantité, prix in self.courtage]
+        a = json.dumps({"courant": serialized_courant,
+                       "courtage": serialized_courtage})
         with open(nom_fichier, "w", encoding="utf8") as fichier:
             fichier.write(a)
 
@@ -339,7 +341,7 @@ class Portefeuille:
 class PortefeuilleGraphique(Portefeuille):
     """Gestion d'un portefeuille d'actions et de liquidités avec graphiques"""
 
-    def lister(self, date, valeurs):    # CHANGER VALEUR POUR CE QU'ON VEUT
+    def lister_graph(self, date: datetime.date, valeurs):    # CHANGER VALEUR POUR CE QU'ON VEUT
         """
         Affiche un graphique de l'historique des valeurs des actions.
 
@@ -347,18 +349,16 @@ class PortefeuilleGraphique(Portefeuille):
             date (datetime): La date de début de l'historique.
             valeurs (list): Une liste des valeurs des actions.
         """
-
-        x = np.linspace(date, datetime.today())
+        x = np.linspace(date, datetime.today().date(), dtype=datetime.date)
 
         plt.title("Historique des valeurs des actions")
         plt.ylabel("Valeurs des actions à la bourse")
         plt.xlabel("Dates")
-        plt.xticks(rotation=46)   #pour l'esthétique
+        plt.xticks(rotation=46)  # pour l'esthétique
         plt.plot(x, valeurs, "b-", label="courbe valeurs bourse")
         plt.legend()
         plt.grid(True)
         plt.show()
-
 
     def projeter(self, date, valeurs):
         """
